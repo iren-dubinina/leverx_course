@@ -1,5 +1,6 @@
 import json
 from dict2xml import dict2xml
+import argparse
 
 
 class JsonReader:
@@ -7,12 +8,11 @@ class JsonReader:
         This class is used to read json files
     """
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, filename):
+        self.filename = filename
 
     def read(self):
-        filename = input("Input path for input file {}: ".format(self.name))
-        with open(filename) as json_file:
+        with open(self.filename) as json_file:
             data = json.load(json_file)
         return data
     
@@ -23,8 +23,7 @@ class Writer:
     """
         This class is used to write in files
     """
-    def __init__(self):
-        extension = input("Input extension for output file: ")
+    def __init__(self, extension):
         self.extension = extension.strip()
 
     @staticmethod
@@ -46,10 +45,8 @@ class Writer:
             elif self.extension == "xml":
                 self.write_xml(self, data, output_file)
             else:
-                raise TypeError("Invalid extension")
+                print("Such extension not supported")
             print("Result saved in {}".format(output_file))
-        except TypeError as t:
-            print(t)
         except IOError as io:
             print(io)
 
@@ -57,10 +54,18 @@ class Writer:
 
 
 if __name__ == "__main__":
-    rooms_reader = JsonReader("rooms")
+    
+    parser = argparse.ArgumentParser(description='Files to combine and save')
+    parser.add_argument('--indir_rooms', type=str, default="rooms.json", help='Input path for file with rooms')
+    parser.add_argument('--indir_students', type=str, default="students.json", help='Input path for file with students')
+    parser.add_argument('--extension', type=str, default="json", help='Input extension for output file')
+    args = parser.parse_args()
+    print(args)
+    
+    rooms_reader = JsonReader(args.indir_rooms)
     rooms_list = rooms_reader.read()
 
-    students_reader = JsonReader("students")
+    students_reader = JsonReader(args.indir_students)
     students_list = students_reader.read()
 
     result_list = []
@@ -76,5 +81,5 @@ if __name__ == "__main__":
         room_with_students['students'] = students_in_room
         result_list.append(room_with_students)
 
-    data_writer = Writer()
+    data_writer = Writer(args.extension)
     data_writer.write(result_list)
