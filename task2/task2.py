@@ -16,14 +16,14 @@ class Version:
         self.add_version = tuple(re.findall(self.ADD_VERSION_PATTERN, tmp_string))
         pass
 
-    def __lt__(self, version_2):
-        if self.base_version < version_2.base_version:
-            return True
-        if self.add_version != () and version_2.add_version == ():
-            return True
-        if self.add_version < version_2.add_version:
-            return True
-        return False
+    # def __lt__(self, version_2):
+    #     if self.base_version < version_2.base_version:
+    #         return True
+    #     if self.add_version != () and version_2.add_version == ():
+    #         return True
+    #     if self.add_version < version_2.add_version:
+    #         return True
+    #     return False
 
 
     def __gt__(self, version_2):
