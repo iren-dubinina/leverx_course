@@ -1,4 +1,5 @@
 import json
+from typing import List, Any
 from dict2xml import dict2xml
 import argparse
 
@@ -15,71 +16,70 @@ class JsonReader:
         with open(self.filename) as json_file:
             data = json.load(json_file)
         return data
-    
-
 
 
 class Writer:
     """
         This class is used to write in files
     """
-    def __init__(self, extension):
-        self.extension = extension.strip()
 
-    @staticmethod
-    def write_json(self, data, file_name):
-        with open(file_name, 'w') as outfile:
+    def __init__(self, extension) -> object:
+        self.extension = extension.strip()
+        self.output_file = "output.{}".format(self.extension)
+
+    def write_in_file(self):
+        pass
+
+
+class JSWriter(Writer):
+    def write_in_file(self, data):
+        with open(self.output_file, 'w') as outfile:
             json.dump(data, outfile)
 
-    @staticmethod
-    def write_xml(self, data, file_name):
-        xml = dict2xml(result_list)
-        with open(file_name, 'w') as outfile:
+
+class XMLWriter(Writer):
+    def write_in_file(self, data):
+        xml = dict2xml(data)
+        with open(self.output_file, 'w') as outfile:
             outfile.write(xml)
-
-    def write(self, data):
-        try:
-            output_file = "output.{}".format(self.extension)
-            if self.extension == "json":
-                self.write_json(self, data, output_file)
-            elif self.extension == "xml":
-                self.write_xml(self, data, output_file)
-            else:
-                print("Such extension not supported")
-            print("Result saved in {}".format(output_file))
-        except IOError as io:
-            print(io)
-
-            
 
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser(description='Files to combine and save')
-    parser.add_argument('--indir_rooms', type=str, default="rooms.json", help='Input path for file with rooms')
-    parser.add_argument('--indir_students', type=str, default="students.json", help='Input path for file with students')
+    parser.add_argument('--in_dir_rooms', type=str, default="rooms.json", help='Input path for file with rooms')
+    parser.add_argument('--in_dir_students', type=str, default="students.json",
+                        help='Input path for file with students')
     parser.add_argument('--extension', type=str, default="json", help='Input extension for output file')
     args = parser.parse_args()
     print(args)
-    
-    rooms_reader = JsonReader(args.indir_rooms)
+
+    rooms_reader = JsonReader(args.in_dir_rooms)
     rooms_list = rooms_reader.read()
 
-    students_reader = JsonReader(args.indir_students)
+    students_reader = JsonReader(args.in_dir_students)
     students_list = students_reader.read()
 
-    result_list = []
+    students_by_room = {}
+    for student in students_list:
+        room = student['room']
+        if room not in students_by_room:
+            students_by_room[room] = []
+        students_by_room[room].append(student)
+
     for room in rooms_list:
-        room_with_students = room
-        students_in_room = [student for student in students_list if student['room'] == room['id']]
+        room['students'] = students_by_room[room['id']]
 
-        #         for student in students_list:
-        #             if student['room'] == room['id']:
-        #                 students_in_room.append(student)
-        # ?               del(students_list[student])
+    if args.extension == "json":
+        data_writer = JSWriter(args.extension)
+    elif args.extension == "xml":
+        data_writer = XMLWriter(args.extension)
+    else:
+        print('Such extension not supported')
 
-        room_with_students['students'] = students_in_room
-        result_list.append(room_with_students)
-
-    data_writer = Writer(args.extension)
-    data_writer.write(result_list)
+    try:
+        data_writer.write_in_file(rooms_list)
+    except IOError as io:
+        print('Error writing to file')
+    else:
+        print("Result saved in {}".format(data_writer.output_file))
