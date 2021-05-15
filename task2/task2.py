@@ -14,13 +14,12 @@ class Version:
         # Extract additional part of version
         tmp_string = re.sub(self.BASE_VERSION_PATTERN, '!', version)
         self.add_version = tuple(re.findall(self.ADD_VERSION_PATTERN, tmp_string))
-        pass
 
 
     def __gt__(self, version_2):
         if self.base_version > version_2.base_version:
             return True
-        if version_2.add_version != () and self.add_version == ():
+        if version_2.add_version and (not self.add_version):
             return True
         if self.add_version > version_2.add_version:
             return True
