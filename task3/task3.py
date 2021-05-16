@@ -1,27 +1,25 @@
-from threading import Thread, Lock
-
-a = 0
-lock = Lock()
+import threading
+import concurrent.futures
 
 
-def function(arg):
-    global a
-    for _ in range(arg[1]):
-        lock.acquire()
-        a += 1
-        lock.release()
+class UpdateA:
+    def __init__(self):
+        self.a = 0
+        self._lock = threading.Lock()
+
+    def update_a(self, arg):
+        with self._lock:
+            for _ in range(arg):
+                self.a += 1
 
 
 def main():
-    threads = []
-    for i in range(5):
-        thread = Thread(target=function, args=((i, 1000000),))
-        thread.start()
-        threads.append(thread)
-
-    [t.join() for t in threads]
-
-    print("----------------------", a)  # ???
+    my_value = UpdateA()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        for index in range(5):
+            executor.submit((my_value.update_a(1000000), index))
+        # executor.map(function(1000000, range), range(5))
+    print("----------------------", my_value.a)
 
 
 if __name__ == "__main__":
