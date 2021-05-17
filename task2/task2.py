@@ -5,16 +5,17 @@ class Version:
     """
     Identifys and comparares versions
     """
-    BASE_VERSION_PATTERN = "[0-9]+.[0-9]+.[0-9]+"
+    BASE_VERSION_PATTERN = "[.0-9]+"
     ADD_VERSION_PATTERN = "[0-9a-z]+"
 
     def __init__(self, version):
         # Extract numeric part of version
         self.base_version = tuple([int(key) for key in re.findall(self.BASE_VERSION_PATTERN, version)[0].split('.')])
+        # Fill empty positions with zeros
+        self.base_version = tuple(list(self.base_version) + [0] * (3 - len(list(self.base_version))))
         # Extract additional part of version
         tmp_string = re.sub(self.BASE_VERSION_PATTERN, '!', version)
         self.add_version = tuple(re.findall(self.ADD_VERSION_PATTERN, tmp_string))
-
 
     def __gt__(self, version_2):
         if self.base_version > version_2.base_version:
@@ -25,12 +26,10 @@ class Version:
             return True
         return False
 
-
-    def __ne__(self, version_2):
-        if self.base_version != version_2.base_version:
-            return True
-        if self.add_version != version_2.add_version:
-            return True
+    def __eq__(self, version_2):
+        if self.base_version == version_2.base_version:
+            if self.add_version == version_2.add_version:
+                return True
         return False
 
 
