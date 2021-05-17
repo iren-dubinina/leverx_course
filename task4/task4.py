@@ -5,7 +5,16 @@ from queries import *
 
 
 def main():
-    db = Database()
+    parser = argparse.ArgumentParser(description='Files of rooms and students')
+    parser.add_argument('--in_dir_rooms', type=str, default="rooms.json", help='Input path for file with rooms')
+    parser.add_argument('--in_dir_students', type=str, default="students.json",
+                        help='Input path for file with students')
+    parser.add_argument('--extension', type=str, default="json", help='Input extension for output file')
+    parser.add_argument('--db_user', type=str, default="root", help='Input user for db')
+    parser.add_argument('--db_password', type=str, default="", help='Input password for db')
+    args = parser.parse_args()
+
+    db = Database(args.db_user, args.db_password)
 
     # Create db if not exists
     db.execute(create_db_query())
@@ -14,14 +23,6 @@ def main():
     # Create tables if not exist
     db.execute(create_table_room_query())
     db.execute(create_table_students_query())
-
-    # Parse tables
-    parser = argparse.ArgumentParser(description='Files of rooms and students')
-    parser.add_argument('--in_dir_rooms', type=str, default="rooms.json", help='Input path for file with rooms')
-    parser.add_argument('--in_dir_students', type=str, default="students.json",
-                        help='Input path for file with students')
-    parser.add_argument('--extension', type=str, default="json", help='Input extension for output file')
-    args = parser.parse_args()
 
     # Parse files
     rooms_reader = JsonReader(args.in_dir_rooms)
