@@ -1,6 +1,7 @@
 import json
 from typing import List, Any
 from dict2xml import dict2xml
+from decimal import Decimal
 import argparse
 
 
@@ -8,8 +9,7 @@ class JsonReader:
     """
         This class is used to read json files
     """
-
-    def __init__(self, filename):
+    def __init__(self, filename) -> object:
         self.filename = filename
 
     def read(self):
@@ -18,29 +18,16 @@ class JsonReader:
         return data
 
 
-class Writer:
-    """
-        This class is used to write in files
-    """
-
-    def __init__(self, extension) -> object:
-        self.extension = extension.strip()
-        self.output_file = "output.{}".format(self.extension)
-
-    def write_in_file(self):
-        pass
+class JSWriter:
+    def write_in_file(self, filename, data):
+        with open(f"{filename}.json", 'w') as outfile:
+            json.dump(data, outfile, ensure_ascii=False, default=str)
 
 
-class JSWriter(Writer):
-    def write_in_file(self, data):
-        with open(self.output_file, 'w') as outfile:
-            json.dump(data, outfile)
-
-
-class XMLWriter(Writer):
-    def write_in_file(self, data):
+class XMLWriter:
+    def write_in_file(self, filename, data):
         xml = dict2xml(data)
-        with open(self.output_file, 'w') as outfile:
+        with open(f"{filename}.xml", 'w') as outfile:
             outfile.write(xml)
 
 
@@ -51,6 +38,7 @@ if __name__ == "__main__":
     parser.add_argument('--in_dir_students', type=str, default="students.json",
                         help='Input path for file with students')
     parser.add_argument('--extension', type=str, default="json", help='Input extension for output file')
+    parser.add_argument('--out_file', type=str, default="outfile", help='Input name for output file')
     args = parser.parse_args()
     print(args)
 
@@ -71,15 +59,15 @@ if __name__ == "__main__":
         room['students'] = students_by_room[room['id']]
 
     if args.extension == "json":
-        data_writer = JSWriter(args.extension)
+        data_writer = JSWriter()
     elif args.extension == "xml":
-        data_writer = XMLWriter(args.extension)
+        data_writer = XMLWriter()
     else:
         print('Such extension not supported')
 
     try:
-        data_writer.write_in_file(rooms_list)
+        data_writer.write_in_file(args.out_file, rooms_list)
     except IOError as io:
         print('Error writing to file')
     else:
-        print("Result saved in {}".format(data_writer.output_file))
+        print("Result saved in {}.{}".format(args.out_file, args.extension))
