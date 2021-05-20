@@ -8,9 +8,9 @@ class UpdateA:
         self._lock = threading.Lock()
 
     def update_a(self, arg):
-        with self._lock:
-            for _ in range(arg):
-                self.a += 1
+       for _ in range(arg):
+           with self._lock:
+               self.a += 1
 
 
 def main():
