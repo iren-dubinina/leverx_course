@@ -34,6 +34,10 @@ class Database:
     def execute(self, query, params=None):
         self.cursor.execute(query, params or ())
 
+    def executemany(self, query, params=None):
+        self.cursor.executemany(query, params or ())
+        self.commit()
+
     def fetchall(self):
         return self.cursor.fetchall()
 
