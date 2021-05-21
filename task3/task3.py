@@ -17,8 +17,7 @@ def main():
     my_value = UpdateA()
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         for index in range(5):
-            executor.submit((my_value.update_a(1000000), index))
-        # executor.map(function(1000000, range), range(5))
+            executor.submit(my_value.update_a, 1000000)
     print("----------------------", my_value.a)
 
 
