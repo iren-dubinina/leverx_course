@@ -74,3 +74,11 @@ def add_index1_query():
 
 def add_index2_query():
     return '''CREATE index ByBirthday on students (room_id, birthday)'''
+
+
+select_queries = {
+    "rooms_with_students_count": rooms_count_students_query,
+    "top_5_min_avg_ages": min_avg_age_query,
+    "top_5_max_age_difference": max_diff_age_query,
+    "diff_sex_students_rooms": diff_sex_query
+}

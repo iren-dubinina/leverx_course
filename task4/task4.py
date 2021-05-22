@@ -1,3 +1,5 @@
+import time
+import pandas as pd
 from task1.task1 import JsonReader, JSWriter, XMLWriter
 from db import Database
 import argparse
@@ -36,35 +38,42 @@ def main():
     db.executemany(insert_rooms_query(), rooms_list)
     db.executemany(insert_students_query(), students_list)
 
-    # Create json writer to save results
+    # Create writer to save results
     writer = JSWriter()
     if args.extension == 'xml':
         writer = XMLWriter()
 
-    # Query1 Select rooms with count of students
-    result = db.query(rooms_count_students_query())
-    writer.write_in_file("rooms_with_students_count", result)
+    timing_results = {
+        "name": select_queries.keys(),
+        "w/o": [],
+        "w": []
+    }
 
-    # Query2 Select 5 rooms with min average ages
-    result = db.query(min_avg_age_query())
-    writer.write_in_file("top_5_min_avg_ages", result)
-
-    # Query3 Select 5 rooms with max difference of ages
-    result = db.query(max_diff_age_query())
-    writer.write_in_file("top_5_max_age_difference", result)
-
-    # Query5 Select rooms with difference sex of students
-    result = db.query(diff_sex_query())
-    writer.write_in_file("diff_sex_students_rooms", result)
+    for query_name in select_queries:
+        start_time = time.time()
+        result = db.query(select_queries[query_name]())
+        end_time = time.time()
+        writer.write_in_file(query_name, result)
+        timing_results["w/o"].append(end_time - start_time)
 
     # Create index1 for Students table
-    result = db.query(add_index1_query())
+    # result = db.query(add_index1_query())
 
     # Create index2 for Students table
     result = db.query(add_index2_query())
 
+    for query_name in select_queries:
+        start_time = time.time()
+        result = db.query(select_queries[query_name]())
+        end_time = time.time()
+        writer.write_in_file(query_name, result)
+        timing_results["w"].append(end_time - start_time)
+
     # Close connection
     db.close()
+
+    # Print time results
+    print(pd.DataFrame(timing_results))
 
 
 if __name__ == '__main__':
